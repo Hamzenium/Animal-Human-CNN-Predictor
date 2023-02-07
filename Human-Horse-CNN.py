@@ -52,26 +52,26 @@ next_human_pix = [os.path.join(train_human_dir, fname)
 
 model = tf.keras.models.Sequential([
 
-    # This is the first convolution
+   
     tf.keras.layers.Conv2D(16, (3,3), activation='relu', input_shape=(300, 300, 3)),
     tf.keras.layers.MaxPooling2D(2, 2),
-    # The second convolution
+ 
     tf.keras.layers.Conv2D(32, (3,3), activation='relu'),
     tf.keras.layers.MaxPooling2D(2,2),
-    # The third convolution
+
     tf.keras.layers.Conv2D(64, (3,3), activation='relu'),
     tf.keras.layers.MaxPooling2D(2,2),
-    # The fourth convolution
+  
     tf.keras.layers.Conv2D(64, (3,3), activation='relu'),
     tf.keras.layers.MaxPooling2D(2,2),
-    # The fifth convolution
+
     tf.keras.layers.Conv2D(64, (3,3), activation='relu'),
     tf.keras.layers.MaxPooling2D(2,2),
-    # Flatten the results to feed into a DNN
+
     tf.keras.layers.Flatten(),
-    # 512 neuron hidden layer
+
     tf.keras.layers.Dense(512, activation='relu'),
-    # Only 1 output neuron. It will contain a value from 0-1 where 0 for 1 class ('horses') and 1 for the other ('humans')
+
     tf.keras.layers.Dense(1, activation='sigmoid')
 ])
 
@@ -85,15 +85,15 @@ from keras.preprocessing.image import ImageDataGenerator
 
 path = os.path.join('/Users/muhammadhamzasohail/Desktop/horse-or-human')
 
-# All images will be rescaled by 1./255
+
 train_datagen = ImageDataGenerator(rescale=1/255)
 
-# Flow training images in batches of 128 using train_datagen generator
+
 train_generator = train_datagen.flow_from_directory(
-        path,  # This is the source directory for training images
-        target_size=(300, 300),  # All images will be resized to 300x300
+        path, 
+        target_size=(300, 300),  
         batch_size=128,
-        # Since we use binary_crossentropy loss, we need binary labels
+
         class_mode='binary')
 
 model.compile(loss='binary_crossentropy',
@@ -103,11 +103,11 @@ model.compile(loss='binary_crossentropy',
 history = model.fit(
       train_generator,
       steps_per_epoch=8,  
-      epochs=5,
+      epochs=15,
       verbose=1)
 
 
-
+model.save('model.h5')
 
 img = load_img(path_img, target_size=(300, 300))
 x = img_to_array(img)
@@ -118,14 +118,26 @@ print(classes[0])
 result =""
 if classes[0]>0.5:
     result = "The image seems to be of a human"
-    print("The image is a human")
+    print("You image prediction based on the CNN model is of a human.")
 else:
-    result = "The image seems to be of a horse"
-    print("The image is a horse")
+    result = "You image prediction based on the CNN model is of a horse"
+    print("You image prediction based on the CNN model is of a horse.")
 
-number = 0 
-while number != 10000000:
-    sg.popup('You image prediction based on the CNN model is:', result)
-    number = number + 1
 
-        
+
+import PySimpleGUI as sg
+
+layout = [[sg.Text(result)], [sg.Button("OK")]]
+
+# Create the window
+window = sg.Window("Demo", layout)
+
+# Create an event loop
+while True:
+    event, values = window.read()
+    # End program if user closes window or
+    # presses the OK button
+    if event == "OK" or event == sg.WIN_CLOSED:
+        break
+
+window.close()
